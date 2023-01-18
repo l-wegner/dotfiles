@@ -13,7 +13,8 @@ import XMonad.Actions.CycleWS
 import XMonad.Actions.Submap (submap)
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
-import XMonad.Util.EZConfig(additionalKeys)
+import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.WorkspaceHistory (workspaceHistoryHook)
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
 import Data.Monoid
@@ -45,7 +46,7 @@ myBorderWidth   = 2
 -- "windows key" is usually mod4Mask.
 --
 myModMask       = mod4Mask
-
+myAltMask       = mod1Mask
 -- The default number of workspaces (virtual screens) and their names.
 -- By default we use numeric strings, but any string may be used as a
 -- workspace name. The number of workspaces is determined by the length
@@ -76,20 +77,23 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch gmrun
     , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
 
+    -- cycle through workspaces
+    , ((myAltMask ,         xK_Tab   ), nextWS)
+
+    -- toggle workspaces
+    , ((myAltMask .|. shiftMask, xK_Tab   ), toggleWS)
+
     -- close focused window
     , ((modm .|. shiftMask, xK_c     ), kill)
 
      -- Rotate through the available layout algorithms
-    , ((modm,               xK_space ), sendMessage NextLayout)
+    , ((modm,               xK_Tab ), sendMessage NextLayout)
 
     --  Reset the layouts on the current workspace to default
-    , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
+    , ((modm .|. shiftMask, xK_Tab ), setLayout $ XMonad.layoutHook conf)
 
     -- Resize viewed windows to the correct size
     , ((modm,               xK_n     ), refresh)
-
-    -- Move focus to the next window
-    , ((modm,               xK_Tab   ), windows W.focusDown)
 
     -- Move focus to the next window
     , ((modm,               xK_j     ), windows W.focusDown)
@@ -106,8 +110,14 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- Swap the focused window with the next window
     , ((modm .|. shiftMask, xK_j     ), windows W.swapDown  )
 
+    -- move window to next WS and switch to it
+    , ((modm .|. shiftMask .|. myAltMask, xK_j), shiftToNext >> nextWS)
+
     -- Swap the focused window with the previous window
     , ((modm .|. shiftMask, xK_k     ), windows W.swapUp    )
+
+    -- move window to previous WS and switch to it
+    , ((modm .|. shiftMask .|. myAltMask, xK_j),   shiftToPrev >> prevWS)
 
     -- Shrink the master area
     , ((modm,               xK_h     ), sendMessage Shrink)
