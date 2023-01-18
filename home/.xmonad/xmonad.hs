@@ -149,6 +149,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- Run xmessage with a summary of the default keybindings (useful for beginners)
     , ((modm .|. shiftMask, xK_slash ), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
 
+    -- launch switch key layout
+    , ((modm ,              xK_space ), spawn ".xmonad/switch-kb-layout.sh de us")
+
     -- set multimedia keys (identified with `xev`)
     -- source https://lambdablob.com/posts/xmonad-audio-volume-alsa-pulseaudio/
     , ((0, xF86XK_AudioMute),        spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
@@ -275,6 +278,7 @@ myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP xmobarPP
 --
 -- By default, do nothing.
 myStartupHook = do
+  spawn "setxkbmap us"
   spawnOnce "nitrogen --restore &"
   spawnOnce "compton &"
 
