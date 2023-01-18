@@ -170,6 +170,14 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((controlMask, xK_Print), spawn "scrot -e 'xclip -selection clipboard -t image/png -i \"$f\"; rm \"$f\"'  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
     , ((controlMask .|. shiftMask, xK_Print), unGrab >> spawn "scrot -s -e 'xclip -selection clipboard -t image/png -i \"$f\"; rm \"$f\"'  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
 
+    -- timewarrior
+    , ((modm, xK_s ) , submap . M.fromList $
+       [ (( 0, xK_space ) , spawn "timew stop")
+       , (( 0, xK_c )     , spawn "timew start cx")
+       , (( 0, xK_w )     , spawn "timew start wc")
+       , (( 0, xK_s )     , spawn "timew stop; timew start")
+       ])
+
     ]
     ++
 
