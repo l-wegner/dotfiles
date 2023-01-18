@@ -71,11 +71,11 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch a terminal
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
 
-    -- launch dmenu
-    , ((modm,               xK_p     ), spawn "dmenu_run")
+    -- launch rofi desktop files
+    , ((modm,               xK_p     ), spawn "rofi -show drun")
 
-    -- launch gmrun
-    , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
+    -- launch rofi commands
+    , ((modm .|. shiftMask, xK_p     ), spawn "rofi -show run")
 
     -- cycle through workspaces
     , ((myAltMask ,         xK_Tab   ), nextWS)
