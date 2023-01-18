@@ -17,6 +17,7 @@ import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.WorkspaceHistory (workspaceHistoryHook)
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
+import XMonad.Util.Ungrab (unGrab)
 import Data.Monoid
 import System.Exit
 
@@ -161,6 +162,14 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((0, xF86XK_AudioPlay), spawn "playerctl play-pause")
     , ((0, xF86XK_AudioNext), spawn "playerctl next")
     , ((0, xF86XK_AudioPrev), spawn "playerctl previous")
+
+    -- screenshotting
+    , ((0, xK_Print), spawn "scrot \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
+    -- unGrab required by scrot -s
+    , ((shiftMask, xK_Print), unGrab >> spawn "scrot -s  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
+    , ((controlMask, xK_Print), spawn "scrot -e 'xclip -selection clipboard -t image/png -i \"$f\"; rm \"$f\"'  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
+    , ((controlMask .|. shiftMask, xK_Print), unGrab >> spawn "scrot -s -e 'xclip -selection clipboard -t image/png -i \"$f\"; rm \"$f\"'  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
+
     ]
     ++
 
