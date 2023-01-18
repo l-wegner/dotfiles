@@ -9,6 +9,9 @@
 import Graphics.X11.ExtraTypes.XF86
 import XMonad
 import XMonad.Actions.CycleWindows
+import XMonad.Actions.CycleWS
+import XMonad.Actions.Submap (submap)
+import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
 import XMonad.Util.EZConfig(additionalKeys)
 import XMonad.Util.Run
@@ -248,7 +251,10 @@ myEventHook = mempty
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
-myLogHook = return ()
+myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP xmobarPP
+  { ppOutput =  hPutStrLn xmproc -- pipe output to xmobar process
+  , ppTitle  = xmobarColor "green" "" . shorten 50  
+  }
 
 ------------------------------------------------------------------------
 -- Startup hook
@@ -269,7 +275,7 @@ myStartupHook = do
 --
 main = do
   xmproc <- spawnPipe "xmobar -x 0 ~/.config/xmobar/xmobarrc"
-  xmonad $ docks defaults
+  xmonad $ docks ( defaults xmproc )
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
@@ -277,7 +283,7 @@ main = do
 --
 -- No need to modify this.
 --
-defaults = def {
+defaults = \xmobarproc -> def {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
@@ -296,7 +302,7 @@ defaults = def {
         layoutHook         = myLayout,
         manageHook         = myManageHook,
         handleEventHook    = myEventHook,
-        logHook            = myLogHook,
+        logHook            = myLogHook xmobarproc,
         startupHook        = myStartupHook
     }
 
