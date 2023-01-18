@@ -279,8 +279,12 @@ myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP xmobarPP
 -- By default, do nothing.
 myStartupHook = do
   spawn "setxkbmap us"
+  spawn "killall trayer"
   spawnOnce "nitrogen --restore &"
   spawnOnce "compton &"
+  spawnOnce "nm-applet &"
+  spawnOnce "pasystray &"
+  spawn ("sleep 2 && trayer --edge top --align right --widthtype request --padding 6 --SetDockType true --SetPartialStrut true --expand true --monitor 0 --transparent true --alpha 0 --tint 0x000000 --height 18 &")
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
