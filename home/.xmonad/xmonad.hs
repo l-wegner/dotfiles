@@ -12,9 +12,12 @@ import XMonad.Actions.CycleWindows
 import XMonad.Actions.CycleWS
 import XMonad.Actions.Submap (submap)
 import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.WorkspaceHistory (workspaceHistoryHook)
+import XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
+import XMonad.Layout.LayoutHints
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
 import XMonad.Util.Ungrab (unGrab)
@@ -269,6 +272,7 @@ myManageHook = composeAll
     , className =? "Gimp"           --> doFloat
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore
+    , className =? "Conky"          --> doFloat 
     , isFullscreen                  --> doFullFloat ]
 
 
@@ -281,7 +285,7 @@ myManageHook = composeAll
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
-myEventHook = mempty
+myEventHook = ewmhDesktopsEventHook 
 
 ------------------------------------------------------------------------
 -- Status bars and logging
@@ -326,7 +330,7 @@ main = do
 --
 -- No need to modify this.
 --
-defaults = \xmobarproc -> def {
+defaults xmobarproc = ewmh $ def {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
