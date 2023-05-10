@@ -23,9 +23,22 @@ import XMonad.Util.SpawnOnce
 import XMonad.Util.Ungrab (unGrab)
 import Data.Monoid
 import System.Exit
-
 import qualified XMonad.StackSet as W
+import Data.Maybe (fromJust,isJust,Maybe(Just))
 import qualified Data.Map        as M
+
+-- Colors
+cUrgent="#ff5555"
+cBorderFocus="#005900"
+cBorder="#777777"
+cXmbCurrent="#00D000"
+cXmbVisible="#0d9300"
+cXmbWinCount="#0d9300"
+cXmbLayoutName="#005900"
+cXmbTitle="#005900"
+cXmbSep="#005900"
+cXmbHidden="#005900"
+cXmbHiddenEmpty="#005900"
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
@@ -60,12 +73,17 @@ myAltMask       = mod1Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
+myWorkspaces = ["main", "alt", "web", "comm", "media" ] ++ map show [6..9]
+myWorkspaceIndices :: M.Map String String
+myWorkspaceIndices = M.fromList $ zipWith (,) myWorkspaces $ map show [1..] 
+
+clickable ws = "<action=xdotool key super+" ++ i ++">"++ws++"</action>"
+   where i = fromJust $ M.lookup ws myWorkspaceIndices
 
 -- Border colors for unfocused and focused windows, respectively.
 --
-myNormalBorderColor  = "#dddddd"
-myFocusedBorderColor = "#ff0000"
+myNormalBorderColor  = cBorder
+myFocusedBorderColor = cBorderFocus
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -289,14 +307,26 @@ myEventHook = ewmhDesktopsEventHook
 
 ------------------------------------------------------------------------
 -- Status bars and logging
-
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
 myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP xmobarPP
   { ppOutput =  hPutStrLn xmproc -- pipe output to xmobar process
-  , ppTitle  = xmobarColor "green" "" . shorten 50  
+  , ppTitle  = xmobarColor cXmbTitle "" . shorten 50
+  --, ppCurrent = xmobarColor cXmbCurrent "" . wrap ("<box type=Bottom width=2 mb=2 color="++ cXmbCurrent ++ ">") "</box>"
+  , ppCurrent = xmobarColor cXmbCurrent "" . wrap "" ""
+  , ppVisible = xmobarColor cXmbVisible "" . wrap "" "" . clickable
+  , ppSep =  "<fc=" ++ cXmbSep ++ "> | </fc>"
+  , ppHidden = xmobarColor cXmbHidden "" . wrap "" "." . clickable
+  , ppHiddenNoWindows = xmobarColor cXmbHiddenEmpty ""  . clickable
+  , ppUrgent = xmobarColor cUrgent "" . wrap "" "!"
+  , ppExtras  = [ windowCount ]
+  , ppOrder  = \(ws:l:t:ex) -> [ws]++ex++[l,t]
+  , ppLayout = xmobarColor cXmbLayoutName ""
   }
+
+windowCount :: X (Maybe String)
+windowCount = gets $ Just . xmobarColor cXmbWinCount "" . show . length . W.integrate' . W.stack . W.workspace . W.current . windowset
 
 ------------------------------------------------------------------------
 -- Startup hook
