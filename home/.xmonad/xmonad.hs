@@ -17,6 +17,7 @@ import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.WorkspaceHistory (workspaceHistoryHook)
 import XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
+import XMonad.Layout.NoBorders
 import XMonad.Layout.LayoutHints
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
@@ -376,7 +377,7 @@ defaults xmobarproc = ewmh $ def {
         mouseBindings      = myMouseBindings,
 
       -- hooks, layouts
-        layoutHook         = myLayout,
+        layoutHook         = smartBorders myLayout,
         manageHook         = myManageHook,
         handleEventHook    = myEventHook,
         logHook            = myLogHook xmobarproc,
