@@ -15,6 +15,7 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.SetWMName
 import XMonad.Hooks.WorkspaceHistory (workspaceHistoryHook)
 import XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
 import XMonad.Layout.NoBorders
@@ -345,13 +346,14 @@ windowCount = gets $ Just . xmobarColor cXmbWinCount "" . show . length . W.inte
 --
 -- By default, do nothing.
 myStartupHook = do
+  setWMName "LG3D"
   spawn "setxkbmap us"
   spawn "killall trayer"
   spawnOnce "nitrogen --restore &"
   spawnOnce "compton &"
   spawnOnce "nm-applet &"
   spawnOnce "pasystray &"
-  spawn ("sleep 2 && trayer --edge top --align right --widthtype request --padding 6 --SetDockType true --SetPartialStrut true --expand true --monitor 0 --transparent true --alpha 0 --tint 0x000000 --height 18 &")
+  spawn ("sleep 2 && trayer --edge top --align right --widthtype request --padding 6 --SetDockType true --SetPartialStrut true --expand true --monitor primary --transparent true --alpha 0 --tint 0x000000 --height 18 &")
 
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
