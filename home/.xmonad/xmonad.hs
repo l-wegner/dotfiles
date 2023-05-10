@@ -291,7 +291,14 @@ myManageHook = composeAll
     , className =? "Gimp"           --> doFloat
     , resource  =? "desktop_window" --> doIgnore
     , resource  =? "kdesktop"       --> doIgnore
-    , className =? "Conky"          --> doFloat 
+    , className =? "firefox"     --> doShift ( myWorkspaces !! 2 )
+    , className =? "strawberry"     --> doShift ( myWorkspaces !! 4 )
+    , className =? "discord"     --> doShift ( myWorkspaces !! 3 )
+    , className =? "Conky"          --> doFloat
+    , className =? "battle.net.exe" --> doFullFloat
+--    , className =? "steam_app_*"    --> doFloat
+    , className =? "steam_app_238960" --> doFullFloat
+
     , isFullscreen                  --> doFullFloat ]
 
 
