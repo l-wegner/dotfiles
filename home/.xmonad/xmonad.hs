@@ -20,6 +20,8 @@ import XMonad.Hooks.WorkspaceHistory (workspaceHistoryHook)
 import XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
 import XMonad.Layout.NoBorders
 import XMonad.Layout.LayoutHints
+import XMonad.Layout.ThreeColumns
+import XMonad.Layout.Spacing
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
 import XMonad.Util.Ungrab (unGrab)
@@ -258,8 +260,11 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = avoidStruts ( tiled ||| Mirror tiled ||| Full )
+myLayout = spacing 4 $ avoidStruts  ( midCol ||| col ||| tiled ||| Full )
   where
+     midCol = ThreeColMid nmaster delta ratio
+     col = ThreeCol nmaster delta ratio
+
      -- default tiling algorithm partitions the screen into two panes
      tiled   = Tall nmaster delta ratio
 
@@ -295,8 +300,9 @@ myManageHook = composeAll
     , className =? "firefox"     --> doShift ( myWorkspaces !! 2 )
     , className =? "strawberry"     --> doShift ( myWorkspaces !! 4 )
     , className =? "discord"     --> doShift ( myWorkspaces !! 3 )
-    , className =? "Conky"          --> doFloat
+--    , className =? "Steam"     --> doShift ( myWorkspaces !! 3 )
     , className =? "battle.net.exe" --> doFullFloat
+    , className =? "Conky"          --> doFloat 
 --    , className =? "steam_app_*"    --> doFloat
     , className =? "steam_app_238960" --> doFullFloat
 
