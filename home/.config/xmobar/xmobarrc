@@ -16,14 +16,15 @@ Config { font = "xft:Ubuntu Mono:pixelsize=14:antialias=true:hinting=true:weight
        , iconRoot = "~/.xmonad/xpm/"
        , allDesktops = True
        , overrideRedirect = True
-       , commands = [ Run Network "eno1" ["-L","0","-H","32",
+       , commands = [ Run Network "enxa0cec8ee9667" ["-L","32768","-H","52428800",
                                           "--normal","green","--high","red"] 10
                     , Run Cpu ["-L","3","-H","50",
-                               "--normal","green","--high","red"] 10
+                               "--normal","green","--high","red"]  10
                     , Run Memory ["-t","Mem: <usedratio>%"] 10
                     , Run Swap [] 10
+                    , Run Battery [] 10
                     , Run Com "uname" ["-s","-r"] "" 36000
-                    , Run Date "%a %Y-%m-%d %H:%M" "date" 10
+                    , Run Date "%a %Y-%m-%d %H:%M:%S" "date" 10
                        -- Script that dynamically adjusts xmobar padding depending on number of trayer icons.
                     , Run Com ".config/xmobar/trayer-padding-icon.sh" [] "trayerpad" 20
 			-- print xmonad loghooks
@@ -32,5 +33,5 @@ Config { font = "xft:Ubuntu Mono:pixelsize=14:antialias=true:hinting=true:weight
                     ]
        , sepChar = "%"
        , alignSep = "}{"
-       , template = " %UnsafeStdinReader% }<fc=#ee9a00>%date%</fc>{ %cpu% | %memory% * %swap% | %eno1% | %kbd% %trayerpad%"
+       , template = " %UnsafeStdinReader% }{<fc=#ee9a00>%date%</fc>  %battery% | %cpu% | %memory% | %enxa0cec8ee9667% | %kbd% %trayerpad%"
        }
