@@ -97,6 +97,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch a terminal
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
 
+    -- launch a terminal for recording
+    , ((modm .|. shiftMask .|. controlMask, xK_Return), spawn "alacritty --config-file ~/.config/alacritty/record-term.yml" )
+
     -- launch rofi desktop files
     , ((modm,               xK_p     ), spawn "rofi -show drun")
 
