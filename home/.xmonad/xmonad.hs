@@ -187,9 +187,11 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((0, xF86XK_AudioLowerVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
     , ((0, xF86XK_AudioRaiseVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
     -- source https://unix.stackexchange.com/questions/439486/how-can-i-make-media-keys-work-with-i3
-    , ((0, xF86XK_AudioPlay), spawn "playerctl play-pause")
-    , ((0, xF86XK_AudioNext), spawn "playerctl next")
-    , ((0, xF86XK_AudioPrev), spawn "playerctl previous")
+    , ((0, xF86XK_AudioPlay          ), spawn "playerctl play-pause")
+    , ((0, xF86XK_AudioNext          ), spawn "playerctl next")
+    , ((modm .|. shiftMask, xK_Right ), spawn "playerctl next")
+    , ((0, xF86XK_AudioPrev          ), spawn "playerctl previous")
+    , ((modm .|. shiftMask, xK_Left  ), spawn "playerctl previous")
 
     -- screenshotting
     , ((0, xK_Print), spawn "scrot \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
