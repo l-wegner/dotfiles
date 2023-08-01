@@ -22,6 +22,7 @@ import XMonad.Layout.NoBorders
 import XMonad.Layout.LayoutHints
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.Spacing
+import XMonad.Util.Cursor
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
 import XMonad.Util.Ungrab (unGrab)
@@ -183,9 +184,11 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- set multimedia keys (identified with `xev`)
     -- source https://lambdablob.com/posts/xmonad-audio-volume-alsa-pulseaudio/
-    , ((0, xF86XK_AudioMute),        spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
-    , ((0, xF86XK_AudioLowerVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ -10%")
-    , ((0, xF86XK_AudioRaiseVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ +10%")
+    , ((0, xF86XK_AudioMute          ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+    , ((0, xF86XK_AudioLowerVolume   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+    , ((modm .|. shiftMask, xK_Down  ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%") 
+    , ((0, xF86XK_AudioRaiseVolume   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+    , ((modm .|. shiftMask, xK_Up    ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
     -- source https://unix.stackexchange.com/questions/439486/how-can-i-make-media-keys-work-with-i3
     , ((0, xF86XK_AudioPlay          ), spawn "playerctl play-pause")
     , ((0, xF86XK_AudioNext          ), spawn "playerctl next")
@@ -305,6 +308,7 @@ myManageHook = composeAll
     , className =? "firefox"     --> doShift ( myWorkspaces !! 2 )
     , className =? "strawberry"     --> doShift ( myWorkspaces !! 4 )
     , className =? "discord"     --> doShift ( myWorkspaces !! 3 )
+    , className =? "jetbrains-goland"     --> doShift ( myWorkspaces !! 0 )
 --    , className =? "Steam"     --> doShift ( myWorkspaces !! 3 )
     , className =? "battle.net.exe" --> doFullFloat
     , className =? "Conky"          --> doFloat 
@@ -357,6 +361,7 @@ windowCount = gets $ Just . xmobarColor cXmbWinCount "" . show . length . W.inte
 --
 -- By default, do nothing.
 myStartupHook = do
+  setDefaultCursor xC_left_ptr
   setWMName "LG3D"
   spawn "setxkbmap us"
   spawn "killall trayer"
@@ -364,6 +369,7 @@ myStartupHook = do
   spawnOnce "compton &"
   spawnOnce "nm-applet &"
   spawnOnce "pasystray &"
+  spawnOnce "firefox &"
   spawn ("sleep 2 && trayer --edge top --align right --widthtype request --padding 6 --SetDockType true --SetPartialStrut true --expand true --monitor primary --transparent true --alpha 0 --tint 0x000000 --height 18 &")
 
 ------------------------------------------------------------------------
