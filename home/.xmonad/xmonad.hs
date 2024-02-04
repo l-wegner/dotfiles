@@ -80,7 +80,7 @@ myAltMask       = mod1Mask
 --
 myWorkspaces = ["main", "alt", "web", "comm", "media" ] ++ map show [6..9]
 myWorkspaceIndices :: M.Map String String
-myWorkspaceIndices = M.fromList $ zipWith (,) myWorkspaces $ map show [1..] 
+myWorkspaceIndices = M.fromList $ zipWith (,) myWorkspaces $ map show [1..]
 
 clickable ws = "<action=xdotool key super+" ++ i ++">"++ws++"</action>"
    where i = fromJust $ M.lookup ws myWorkspaceIndices
@@ -96,25 +96,25 @@ myFocusedBorderColor = cBorderFocus
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch a terminal
-    [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
+    [ (( modm ,                              xK_Return), spawn $ XMonad.terminal conf)
 
     -- launch a terminal for recording
-    , ((modm .|. shiftMask .|. controlMask, xK_Return), spawn "alacritty --config-file ~/.config/alacritty/record-term.yml" )
+    , (( modm .|. shiftMask .|. controlMask, xK_Return), spawn "alacritty --config-file ~/.config/alacritty/record-term.yml" )
 
     -- launch rofi desktop files
-    , ((modm,               xK_p     ), spawn "rofi -show drun")
+    , (( modm,                               xK_p     ), spawn "rofi -show drun")
 
     -- launch rofi commands
-    , ((modm .|. shiftMask, xK_p     ), spawn "rofi -show run")
+    , (( modm .|. shiftMask,                 xK_p     ), spawn "rofi -show run")
 
     -- cycle through workspaces
-    , ((myAltMask ,         xK_Tab   ), nextWS)
+    , (( myAltMask .|. shiftMask,            xK_Tab   ), nextWS)
 
     -- toggle workspaces
-    , ((myAltMask .|. shiftMask, xK_Tab   ), toggleWS)
+    , (( myAltMask ,                         xK_Tab   ), toggleWS)
 
     -- close focused window
-    , ((modm .|. shiftMask, xK_c     ), kill)
+    , (( modm .|. shiftMask,                 xK_c     ), kill)
 
      -- Rotate through the available layout algorithms
     , ((modm,               xK_Tab ), sendMessage NextLayout)
@@ -122,85 +122,71 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     --  Reset the layouts on the current workspace to default
     , ((modm .|. shiftMask, xK_Tab ), setLayout $ XMonad.layoutHook conf)
 
-    -- Resize viewed windows to the correct size
-    , ((modm,               xK_n     ), refresh)
-
     -- Move focus to the next window
-    , ((modm,               xK_j     ), windows W.focusDown)
+    , (( modm,                               xK_j     ), windows W.focusDown)
 
     -- Move focus to the previous window
-    , ((modm,               xK_k     ), windows W.focusUp  )
+    , (( modm,                               xK_k     ), windows W.focusUp  )
 
     -- Move focus to the master window
-    , ((modm,               xK_m     ), windows W.focusMaster  )
+    , (( modm,                               xK_m     ), windows W.focusMaster  )
 
-    -- Swap the focused window and the master window
-    , ((modm,               xK_Return), windows W.swapMaster)
 
     -- Swap the focused window with the next window
-    , ((modm .|. shiftMask, xK_j     ), windows W.swapDown  )
+    , (( modm .|. shiftMask,                 xK_j     ), windows W.swapDown  )
 
     -- move window to next WS and switch to it
-    , ((modm .|. shiftMask .|. myAltMask, xK_j), shiftToNext >> nextWS)
+    , (( modm .|. shiftMask .|. myAltMask,   xK_j     ), shiftToNext >> nextWS)
 
     -- Swap the focused window with the previous window
-    , ((modm .|. shiftMask, xK_k     ), windows W.swapUp    )
+    , (( modm .|. shiftMask,                 xK_k     ), windows W.swapUp    )
 
     -- move window to previous WS and switch to it
-    , ((modm .|. shiftMask .|. myAltMask, xK_j),   shiftToPrev >> prevWS)
+    , (( modm .|. shiftMask .|. myAltMask,   xK_k     ), shiftToPrev >> prevWS)
 
     -- Shrink the master area
-    , ((modm,               xK_h     ), sendMessage Shrink)
+    , (( modm,                               xK_h     ), sendMessage Shrink)
 
     -- Expand the master area
-    , ((modm,               xK_l     ), sendMessage Expand)
-
-    -- Push window back into tiling
-    , ((modm,               xK_t     ), withFocused $ windows . W.sink)
-
-    -- Increment the number of windows in the master area
-    , ((modm              , xK_comma ), sendMessage (IncMasterN 1))
-
-    -- Deincrement the number of windows in the master area
-    , ((modm              , xK_period), sendMessage (IncMasterN (-1)))
+    , (( modm,                               xK_l     ), sendMessage Expand)
 
     -- Toggle the status bar gap
     -- Use this binding with avoidStruts from Hooks.ManageDocks.
     -- See also the statusBar function from Hooks.DynamicLog.
     --
-    -- , ((modm              , xK_b     ), sendMessage ToggleStruts)
+    -- , (( modm              ,                 xK_b     ), sendMessage ToggleStruts)
 
     -- Quit xmonad
-    , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
+    , (( modm .|. shiftMask,                 xK_q     ), io (exitWith ExitSuccess))
 
     -- Restart xmonad
-    , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
+    , (( modm,                               xK_q     ), spawn "xmonad --recompile; xmonad --restart")
 
     -- Run xmessage with a summary of the default keybindings (useful for beginners)
-    , ((modm .|. shiftMask, xK_slash ), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
+    , (( modm .|. shiftMask,                 xK_slash ), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
 
     -- launch switch key layout
-    , ((modm ,              xK_space ), spawn ".xmonad/switch-kb-layout.sh de us")
+    , (( modm ,                              xK_space ), spawn ".xmonad/switch-kb-layout.sh de us")
 
     -- set multimedia keys (identified with `xev`)
     -- source https://lambdablob.com/posts/xmonad-audio-volume-alsa-pulseaudio/
-    , ((0, xF86XK_AudioMute          ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
-    , ((0, xF86XK_AudioLowerVolume   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
-    , ((modm .|. shiftMask, xK_Down  ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%") 
-    , ((0, xF86XK_AudioRaiseVolume   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
-    , ((modm .|. shiftMask, xK_Up    ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+    , (( 0,                  xF86XK_AudioMute          ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+    , (( 0,                  xF86XK_AudioLowerVolume   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+    , (( modm .|. shiftMask, xK_Down                   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+    , (( 0,                  xF86XK_AudioRaiseVolume   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+    , (( modm .|. shiftMask, xK_Up                     ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
     -- source https://unix.stackexchange.com/questions/439486/how-can-i-make-media-keys-work-with-i3
-    , ((0, xF86XK_AudioPlay          ), spawn "playerctl play-pause")
-    , ((0, xF86XK_AudioNext          ), spawn "playerctl next")
-    , ((modm .|. shiftMask, xK_Right ), spawn "playerctl next")
-    , ((0, xF86XK_AudioPrev          ), spawn "playerctl previous")
-    , ((modm .|. shiftMask, xK_Left  ), spawn "playerctl previous")
+    , (( 0,                  xF86XK_AudioPlay          ), spawn "playerctl play-pause")
+    , (( 0,                  xF86XK_AudioNext          ), spawn "playerctl next")
+    , (( modm .|. shiftMask, xK_Right ), spawn "playerctl next")
+    , (( 0,                  xF86XK_AudioPrev          ), spawn "playerctl previous")
+    , (( modm .|. shiftMask, xK_Left  ), spawn "playerctl previous")
 
     -- screenshotting
-    , ((0, xK_Print), spawn "scrot \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
+    , ((0,                         xK_Print), spawn "scrot \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
     -- unGrab required by scrot -s
-    , ((shiftMask, xK_Print), unGrab >> spawn "scrot -s  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
-    , ((controlMask, xK_Print), spawn "scrot -e 'xclip -selection clipboard -t image/png -i \"$f\"; rm \"$f\"'  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
+    , ((shiftMask,                 xK_Print), unGrab >> spawn "scrot -s  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
+    , ((controlMask,               xK_Print), spawn "scrot -e 'xclip -selection clipboard -t image/png -i \"$f\"; rm \"$f\"'  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
     , ((controlMask .|. shiftMask, xK_Print), unGrab >> spawn "scrot -s -e 'xclip -selection clipboard -t image/png -i \"$f\"; rm \"$f\"'  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
 
     -- timewarrior
@@ -212,10 +198,26 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
        ])
 
     -- desk light
-    , ((modm , xK_d )  , submap . M.fromList $
+    , ((modm , xK_d ) , submap . M.fromList $
        [ (( 0, xK_l ) , spawn "elrs" )
        ]
       )
+      -- xmonad seldomly used.
+      , ((modm , xK_x ) , submap . M.fromList $
+             -- Increment the number of windows in the master area
+             [ (( 0, xK_comma ), sendMessage (IncMasterN 1))
+             -- Deincrement the number of windows in the master area
+             , (( 0, xK_period), sendMessage (IncMasterN (-1)))
+             -- Swap the focused window and the master window
+             , (( 0, xK_Return), windows W.swapMaster)
+             --  Reset the layouts on the current workspace to default
+             , (( 0 , xK_Tab  ), setLayout $ XMonad.layoutHook conf)
+             -- Resize viewed windows to the correct size
+             , (( 0 , xK_n    ), refresh)
+             -- Push window back into tiling
+             , (( 0 , xK_t    ), withFocused $ windows . W.sink)
+             ]
+            )
 
     ]
     ++
@@ -311,7 +313,7 @@ myManageHook = composeAll
     , className =? "jetbrains-goland"     --> doShift ( myWorkspaces !! 0 )
 --    , className =? "Steam"     --> doShift ( myWorkspaces !! 3 )
     , className =? "battle.net.exe" --> doFullFloat
-    , className =? "Conky"          --> doFloat 
+    , className =? "Conky"          --> doFloat
 --    , className =? "steam_app_*"    --> doFloat
     , className =? "steam_app_238960" --> doFullFloat
 
@@ -327,7 +329,7 @@ myManageHook = composeAll
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
-myEventHook = ewmhDesktopsEventHook 
+myEventHook = ewmhDesktopsEventHook
 
 ------------------------------------------------------------------------
 -- Status bars and logging
@@ -365,10 +367,10 @@ myStartupHook = do
   setWMName "LG3D"
   spawn "setxkbmap us"
   spawn "killall trayer"
-  spawnOnce "nitrogen --restore &"
-  spawnOnce "compton &"
+  spawnOnce "picom &"
   spawnOnce "nm-applet &"
   spawnOnce "pasystray &"
+  spawnOnce "nitrogen --restore &"
   spawnOnce "firefox &"
   spawn ("sleep 2 && trayer --edge top --align right --widthtype request --padding 6 --SetDockType true --SetPartialStrut true --expand true --monitor primary --transparent true --alpha 0 --tint 0x000000 --height 18 &")
 
