@@ -27,10 +27,12 @@ import XMonad.Layout.PerScreen
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.Spacing
 import XMonad.Util.Cursor
+import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
 import XMonad.Util.Ungrab (unGrab)
 import Data.Monoid
+import Data.Ratio
 import System.Exit
 import qualified XMonad.StackSet as W
 import Data.Maybe (fromJust,isJust,Maybe(Just))
@@ -242,6 +244,15 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
         | (key, sc) <- zip [xK_F1, xK_F2, xK_F3] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+    ++
+    -- Scratchpads
+    [ (( modm, xK_t )     , namedScratchpadAction myScratchPads "terminal")
+    , (( modm, xK_w )     , namedScratchpadAction myScratchPads "web")
+
+    ]
+    -- The following lines are needed for named scratchpads.
+    where   nonNSP          = WSIs (return (\ws -> W.tag ws /= "NSP"))
+            nonEmptyNonNSP  = WSIs (return (\ws -> isJust (W.stack ws) && W.tag ws /= "NSP"))
 
 
 ------------------------------------------------------------------------
@@ -262,6 +273,33 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
+
+
+myPopup :: String -> X ()
+myPopup msg = spawn $ "echo '" ++ msg ++ "' | dzen2 -p 2 -h 30 -w 200 -x 500 -y 500 -fn 'xft:Monospace-12' -bg '#rrggbb' -fg '#rrggbb'"
+
+------------------------------------------------------------------------
+-- Scratchpads :
+-- taken from Derek Tylor
+myScratchPads :: [NamedScratchpad]
+myScratchPads = [ NS "terminal" spawnTerm findTerm manageTerm
+                , NS "web" spawnFirefox findFirefox manageFirefox
+                ]
+  where
+    spawnTerm  = myTerminal ++ " -t scratchpadTerm -e tmux new -s scratch"
+    findTerm   = title =? "scratchpadTerm"
+    manageTerm =  customFloating $ W.RationalRect l t w h
+               where
+                 h = 0.9
+                 w = 0.9
+                 t = 0.95 -h
+                 l = 0.95 -w
+
+    -- fixme: need automation: run first with `firefox --no-remote --ProfileManager` and create profile "Scratchpad"
+    -- todo update /usr/share/applications/firefox.desktop to `Exec=firefox %u -P default-release`
+    spawnFirefox  = "firefox --no-remote --class=scratchpadFirefox  -P Scratchpad --url localhost:3000 "
+    findFirefox   = className =? "scratchpadFirefox"
+    manageFirefox = doRectFloat (W.RationalRect (1 % 4) (1 % 4) (1 % 2) (1 % 2))
 
 ------------------------------------------------------------------------
 -- Layouts:
@@ -327,15 +365,15 @@ myManageHook = composeAll
     , className =? "firefox"     --> doShift ( myWorkspaces !! 2 )
     , className =? "strawberry"     --> doShift ( myWorkspaces !! 4 )
     , className =? "discord"     --> doShift ( myWorkspaces !! 3 )
-    , className =? "jetbrains-goland"     --> doShift ( myWorkspaces !! 0 )
+    --, className =? "jetbrains-goland"     --> doShift ( myWorkspaces !! 0 )
 --    , className =? "Steam"     --> doShift ( myWorkspaces !! 3 )
     , className =? "battle.net.exe" --> doFullFloat
     , className =? "Conky"          --> doFloat
 --    , className =? "steam_app_*"    --> doFloat
     , className =? "steam_app_238960" --> doFullFloat
 
-    , isFullscreen                  --> doFullFloat ]
-
+    , isFullscreen                  --> doFullFloat
+    ] <+> namedScratchpadManageHook myScratchPads
 
 ------------------------------------------------------------------------
 -- Event handling
@@ -353,7 +391,11 @@ myEventHook = ewmhDesktopsEventHook
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
-myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP xmobarPP
+-- for older version
+-- myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP $ namedScratchpadFilterOutWorkspacePP $ xmobarPP
+-- for newer versions
+-- myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP ( filterOutWsPP [scratchpadWorkspaceTag] xmobarPP )
+myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP ( namedScratchpadFilterOutWorkspacePP xmobarPP )
   { ppOutput =  hPutStrLn xmproc -- pipe output to xmobar process
   , ppTitle  = xmobarColor cXmbTitle "" . shorten 50
   --, ppCurrent = xmobarColor cXmbCurrent "" . wrap ("<box type=Bottom width=2 mb=2 color="++ cXmbCurrent ++ ">") "</box>"
@@ -388,7 +430,7 @@ myStartupHook = do
   spawnOnce "nm-applet &"
   spawnOnce "pasystray &"
   spawnOnce "nitrogen --restore &"
-  spawnOnce "firefox &"
+  spawnOnce "firefox -P default-release &"
   spawn ("sleep 2 && trayer --edge top --align right --widthtype request --padding 6 --SetDockType true --SetPartialStrut true --expand true --monitor primary --transparent true --alpha 0 --tint 0x000000 --height 18 &")
 
 ------------------------------------------------------------------------
