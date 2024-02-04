@@ -20,6 +20,10 @@ import XMonad.Hooks.WorkspaceHistory (workspaceHistoryHook)
 import XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
 import XMonad.Layout.NoBorders
 import XMonad.Layout.LayoutHints
+import XMonad.Layout.LayoutModifier
+import XMonad.Layout.MultiToggle
+import XMonad.Layout.MultiToggle.Instances
+import XMonad.Layout.PerScreen
 import XMonad.Layout.ThreeColumns
 import XMonad.Layout.Spacing
 import XMonad.Util.Cursor
@@ -117,10 +121,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , (( modm .|. shiftMask,                 xK_c     ), kill)
 
      -- Rotate through the available layout algorithms
-    , ((modm,               xK_Tab ), sendMessage NextLayout)
+    , (( modm,                               xK_Tab   ), rotateLayout)
 
-    --  Reset the layouts on the current workspace to default
-    , ((modm .|. shiftMask, xK_Tab ), setLayout $ XMonad.layoutHook conf)
+    -- Toggle full screen
+    , (( modm,                               xK_f     ), toggleFull)
 
     -- Move focus to the next window
     , (( modm,                               xK_j     ), windows W.focusDown)
@@ -232,11 +236,11 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     ++
 
     --
-    -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
+    -- mod-{F1,F2,F3}, Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
     --
     [((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
-        | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
+        | (key, sc) <- zip [xK_F1, xK_F2, xK_F3] [0..]
         , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
 
 
@@ -262,6 +266,14 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 ------------------------------------------------------------------------
 -- Layouts:
 
+marginSpacing :: Integer -> l a -> XMonad.Layout.LayoutModifier.ModifiedLayout Spacing l a
+marginSpacing i = spacingRaw False (Border i i i i) True (Border i i i i) True
+
+rotateLayout :: X ()
+rotateLayout = sendMessage NextLayout
+
+toggleFull :: X ()
+toggleFull = sendMessage $ Toggle FULL
 -- You can specify and transform your layouts by modifying these values.
 -- If you change layout bindings be sure to use 'mod-shift-space' after
 -- restarting (with 'mod-q') to reset your layout state to the new
@@ -270,8 +282,13 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myLayout = spacing 4 $ avoidStruts  ( midCol ||| col ||| tiled ||| Full )
+myLayout = mkToggle (NOBORDERS ?? FULL ?? EOT) $ marginSpacing 4 $ avoidStruts $ ifWider 1980 nonFullLayoutsWide nonFullLayouts
   where
+     -- layouts without fullscreen for less then 1920 width pixel monitors
+     nonFullLayouts =  tiled
+     -- layouts without fullscreen for more then 1920 width pixel monitors
+     nonFullLayoutsWide =  midCol ||| col ||| tiled
+
      midCol = ThreeColMid nmaster delta ratio
      col = ThreeCol nmaster delta ratio
 
