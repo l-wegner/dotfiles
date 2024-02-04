@@ -384,7 +384,7 @@ myStartupHook = do
   setWMName "LG3D"
   spawn "setxkbmap us"
   spawn "killall trayer"
-  spawnOnce "picom &"
+  spawnOnce "compton &"
   spawnOnce "nm-applet &"
   spawnOnce "pasystray &"
   spawnOnce "nitrogen --restore &"
