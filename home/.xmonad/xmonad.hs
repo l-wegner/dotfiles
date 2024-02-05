@@ -38,6 +38,8 @@ import qualified XMonad.StackSet as W
 import Data.Maybe (fromJust,isJust,Maybe(Just))
 import qualified Data.Map        as M
 
+import MyUtils (showNotification, isCommandAvailable, findExecutableInList)
+
 -- Colors
 cUrgent="#ff5555"
 cBorderFocus="#005900"
@@ -172,7 +174,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , (( modm .|. shiftMask,                 xK_slash ), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
 
     -- launch switch key layout
-    , (( modm ,                              xK_space ), spawn ".xmonad/switch-kb-layout.sh de us")
+    , (( modm ,                              xK_space ), spawn ".config/xmonad/switch-kb-layout.sh de us")
 
     -- set multimedia keys (identified with `xev`)
     -- source https://lambdablob.com/posts/xmonad-audio-volume-alsa-pulseaudio/
@@ -202,6 +204,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
        , (( 0, xK_w )     , spawn "timew start wc")
        , (( 0, xK_s )     , spawn "timew stop; timew start")
        ])
+    , (( modm, xK_n ) , incrementAndPrint )
 
     -- desk light
     , ((modm , xK_d ) , submap . M.fromList $
@@ -426,7 +429,10 @@ myStartupHook = do
   setWMName "LG3D"
   spawn "setxkbmap us"
   spawn "killall trayer"
-  spawnOnce "compton &"
+  compositor <- liftIO $ findExecutableInList [ "xoxo", "picom", "compton" ]
+  case compositor of
+      Just comp  -> spawnOnce $ comp ++ " &"
+      Nothing -> return ()
   spawnOnce "nm-applet &"
   spawnOnce "pasystray &"
   spawnOnce "nitrogen --restore &"
