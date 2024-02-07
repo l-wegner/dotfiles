@@ -204,7 +204,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
        , (( 0, xK_w )     , spawn "timew start wc")
        , (( 0, xK_s )     , spawn "timew stop; timew start")
        ])
-    , (( modm, xK_n ) , incrementAndPrint )
+--    , (( modm, xK_n ) , incrementAndPrint )
 
     -- desk light
     , ((modm , xK_d ) , submap . M.fromList $
