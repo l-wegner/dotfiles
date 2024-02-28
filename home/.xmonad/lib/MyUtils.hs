@@ -1,5 +1,7 @@
 module MyUtils (
 showNotification,
+getCurrentDateTime,
+spawnDateTimeNotification,
 cycleList,
 isCommandAvailable,
 interfaceNames,
@@ -24,6 +26,14 @@ import XMonad.Util.Run (safeSpawn,runProcessWithInput)
 
 showNotification :: String -> IO ()
 showNotification message = io $ safeSpawn "notify-send" [message]
+
+getCurrentDateTime :: IO String
+getCurrentDateTime = runProcessWithInput "date" ["+%c"] ""
+
+spawnDateTimeNotification :: IO ()
+spawnDateTimeNotification = do
+    dateTime <- getCurrentDateTime
+    showNotification dateTime
 
 cycleList :: IORef [String] -> IO String
 cycleList stateRef = do

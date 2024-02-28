@@ -38,7 +38,7 @@ import qualified XMonad.StackSet as W
 import Data.Maybe (fromJust,isJust,Maybe(Just))
 import qualified Data.Map        as M
 
-import MyUtils (showNotification, isCommandAvailable, findExecutableInList)
+import MyUtils (showNotification, isCommandAvailable, findExecutableInList,spawnDateTimeNotification)
 
 -- Colors
 cUrgent="#ff5555"
@@ -204,6 +204,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
        , (( 0, xK_w )     , spawn "timew start wc")
        , (( 0, xK_s )     , spawn "timew stop; timew start")
        ])
+       , (( modm , xK_n), io $ spawnDateTimeNotification)
 --    , (( modm, xK_n ) , incrementAndPrint )
 
     -- desk light
