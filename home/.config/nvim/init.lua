@@ -16,4 +16,4 @@ vim.opt.rtp:prepend(lazypath)
 
 require("vim-options")
 -- load lazy.nvim
-require("lazy").setup("plugins")
+require("lazy").setup("plugins",{git = { timeout =180 },concurrency=1})
