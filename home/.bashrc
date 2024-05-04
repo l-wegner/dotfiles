@@ -121,3 +121,6 @@ fi
 if [ -d ~/.local/venv/bin ]; then
     export PATH=$HOME/.local/venv/bin:$PATH
 fi
+### asdf ###
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash
