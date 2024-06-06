@@ -215,17 +215,19 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
       -- xmonad seldomly used.
       , ((modm , xK_x ) , submap . M.fromList $
              -- Increment the number of windows in the master area
-             [ (( 0, xK_comma ), sendMessage (IncMasterN 1))
+             [ (( 0        , xK_comma ), sendMessage (IncMasterN 1))
              -- Deincrement the number of windows in the master area
-             , (( 0, xK_period), sendMessage (IncMasterN (-1)))
+             , (( 0        , xK_period), sendMessage (IncMasterN (-1)))
              -- Swap the focused window and the master window
-             , (( 0, xK_Return), windows W.swapMaster)
+             , (( 0        , xK_Return), windows W.swapMaster)
              --  Reset the layouts on the current workspace to default
-             , (( 0 , xK_Tab  ), setLayout $ XMonad.layoutHook conf)
+             , (( 0        , xK_Tab  ), setLayout $ XMonad.layoutHook conf)
              -- Resize viewed windows to the correct size
-             , (( 0 , xK_n    ), refresh)
+             , (( 0        , xK_n    ), refresh)
              -- Push window back into tiling
-             , (( 0 , xK_t    ), withFocused $ windows . W.sink)
+             , (( 0        , xK_t    ), withFocused $ windows . W.sink)
+             , (( 0        , xK_s ), spawn "screenkey")
+             , (( shiftMask, xK_s ), spawn "killall screenkey")
              ]
             )
 
