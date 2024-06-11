@@ -186,10 +186,18 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- source https://unix.stackexchange.com/questions/439486/how-can-i-make-media-keys-work-with-i3
     , (( 0,                  xF86XK_AudioPlay          ), spawn "playerctl play-pause")
     , (( 0,                  xF86XK_AudioNext          ), spawn "playerctl next")
-    , (( modm .|. shiftMask, xK_Right ), spawn "playerctl next")
+    , (( modm .|. shiftMask, xK_Right                  ), spawn "playerctl next")
     , (( 0,                  xF86XK_AudioPrev          ), spawn "playerctl previous")
-    , (( modm .|. shiftMask, xK_Left  ), spawn "playerctl previous")
+    , (( modm .|. shiftMask, xK_Left                   ), spawn "playerctl previous")
 
+    , ((modm, xK_v ) , submap . M.fromList $
+       [ (( 0, xK_l              ), spawn "playerctl next")
+       , (( 0, xK_h              ), spawn "playerctl previous")
+       , (( 0, xK_space          ), spawn "playerctl play-pause")
+       , (( 0, xK_k              ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+       , (( 0, xK_j              ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+       , (( 0, xK_m              ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+       ])
     -- screenshotting
     , ((0,                         xK_Print), spawn "scrot \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
     -- unGrab required by scrot -s
@@ -376,7 +384,6 @@ myManageHook = composeAll
     , className =? "battle.net.exe" --> doFullFloat
     , className =? "Conky"          --> doFloat
 --    , className =? "steam_app_*"    --> doFloat
-    , className =? "steam_app_238960" --> doFullFloat
 
     , isFullscreen                  --> doFullFloat
     ] <+> namedScratchpadManageHook myScratchPads
