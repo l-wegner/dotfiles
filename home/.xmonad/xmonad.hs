@@ -101,6 +101,20 @@ myFocusedBorderColor = cBorderFocus
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
+playerKeys conf@(XConfig {XMonad.modMask = modm}) =
+                    [ (( 0, xK_l              ), spawn "playerctl next")
+                    , (( modm, xK_l           ), spawn "playerctl next" >> (submap . M.fromList $ playerKeys conf))
+                    , (( 0, xK_h              ), spawn "playerctl previous")
+                    , (( modm, xK_h           ), spawn "playerctl previous" >> (submap . M.fromList $ playerKeys conf))
+                    , (( 0, xK_space          ), spawn "playerctl play-pause")
+                    , (( modm, xK_space       ), spawn "playerctl play-pause" >> (submap . M.fromList $ playerKeys conf))
+                    , (( 0, xK_k              ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+                    , (( modm , xK_k          ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%" >> (submap . M.fromList $ playerKeys conf))
+                    , (( 0, xK_j              ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+                    , (( modm, xK_j           ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%" >> (submap . M.fromList $ playerKeys conf))
+                    , (( 0, xK_m              ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+                    , (( modm, xK_m           ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle" >> (submap . M.fromList $ playerKeys conf))
+                    ]
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch a terminal
@@ -190,14 +204,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , (( 0,                  xF86XK_AudioPrev          ), spawn "playerctl previous")
     , (( modm .|. shiftMask, xK_Left                   ), spawn "playerctl previous")
 
-    , ((modm, xK_v ) , submap . M.fromList $
-       [ (( 0, xK_l              ), spawn "playerctl next")
-       , (( 0, xK_h              ), spawn "playerctl previous")
-       , (( 0, xK_space          ), spawn "playerctl play-pause")
-       , (( 0, xK_k              ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
-       , (( 0, xK_j              ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
-       , (( 0, xK_m              ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
-       ])
+    , ((modm, xK_v ) , submap . M.fromList $ playerKeys conf)
     -- screenshotting
     , ((0,                         xK_Print), spawn "scrot \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
     -- unGrab required by scrot -s
