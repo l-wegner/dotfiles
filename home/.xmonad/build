@@ -1,0 +1,2 @@
+#!/bin/bash
+/usr/bin/ghc --make xmonad.hs -i -ilib -fforce-recomp -main-is main -dynamic -v0 -outputdir ${HOME}/.cache/xmonad/build-x86_64-linux -o ${HOME}/.cache/xmonad/xmonad-x86_6z4-linux
