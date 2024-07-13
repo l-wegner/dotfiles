@@ -22,7 +22,8 @@ return {
   		ensure_installed = {
   			"lua-language-server", "stylua",
   			"html-lsp", "css-lsp" , "prettier",
-        "haskell-language-server", "tsserver"
+        "haskell-language-server", "typescript-language-server",
+        "rust-analyzer"
   		},
   	},
   },
