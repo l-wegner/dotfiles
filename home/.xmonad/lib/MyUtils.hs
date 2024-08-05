@@ -7,11 +7,13 @@ isCommandAvailable,
 interfaceNames,
 getWifiSSID,
 getWifiSSIDString,
-findExecutableInList
+findExecutableInList,
+toggleResolution,
+getPrimaryDisplay,
 ) where
 import Control.Monad.State
 import Data.IORef
-import Data.List (isPrefixOf, find)
+import Data.List (isPrefixOf, find,isInfixOf, elemIndex)
 import Data.Maybe (fromMaybe)
 -- ubuntu requires: sudo apt install libghc-hostname-dev
 -- arch requires: sudo pacman -S haskell-hostname
@@ -23,6 +25,8 @@ import Network.Info (getNetworkInterfaces, ipv4, NetworkInterface(..))
 import System.Directory
 import XMonad
 import XMonad.Util.Run (safeSpawn,runProcessWithInput)
+import System.Process (callCommand, readProcess)
+import qualified Data.Map        as M
 
 showNotification :: String -> IO ()
 showNotification message = io $ safeSpawn "notify-send" [message]
@@ -91,6 +95,30 @@ findExecutableInList executables = go executables
 
 myPopup :: String -> IO ()
 myPopup msg = spawn $ "echo '" ++ msg ++ "' | dzen2 -p 2 -h 30 -w 200 -x 500 -y 500 -fn 'xft:Monospace-12' -bg '#rrggbb' -fg '#rrggbb'"
+
+
+-- Function to get the primary display
+getPrimaryDisplay :: IO String
+getPrimaryDisplay = do
+    output <- readProcess "xrandr" ["--query"] ""
+    let primaryLine = head $ filter (isInfixOf " primary") (lines output)
+    return $ head $ words primaryLine
+
+-- Function to toggle between the resolutions
+toggleResolution :: M.Map String [String] -> IO  ()
+toggleResolution resolutionsMap = do
+    display <- getPrimaryDisplay
+    showNotification ("Display " ++ display ++ " not found in the map")
+    case M.lookup display resolutionsMap of
+        Nothing -> do
+            showNotification ("Display " ++ display ++ " not found in the map")
+        Just resolutions -> do
+            showNotification ("Display " ++ display ++ " not found in the map")
+            currentResolution <- fmap (head . words) $ readProcess "xrandr" ["--current", "--verbose"] ""
+            let currentIndex = fromMaybe 0 (elemIndex currentResolution resolutions)
+            let nextIndex = (currentIndex + 1) `mod` length resolutions
+            let newResolution = resolutions !! nextIndex
+            callCommand $ "xrandr --output " ++ display ++ " --mode " ++ newResolution
 
 test :: IO ()
 test = do

@@ -38,7 +38,7 @@ import qualified XMonad.StackSet as W
 import Data.Maybe (fromJust,isJust,Maybe(Just))
 import qualified Data.Map        as M
 
-import MyUtils (showNotification, isCommandAvailable, findExecutableInList,spawnDateTimeNotification)
+import MyUtils (showNotification, isCommandAvailable, findExecutableInList,spawnDateTimeNotification,toggleResolution)
 
 -- Colors
 cUrgent="#ff5555"
@@ -98,27 +98,60 @@ clickable ws = "<action=xdotool key super+" ++ i ++">"++ws++"</action>"
 myNormalBorderColor  = cBorder
 myFocusedBorderColor = cBorderFocus
 
+resolutionsMap :: M.Map String [String]
+resolutionsMap = M.fromList [
+    ("eDP-1", ["1920x1080"]),
+    ("DP-3" , ["3440 x 1440", "1920x1080"])
+    ]
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
 playerKeys conf@(XConfig {XMonad.modMask = modm}) =
-                    [ (( 0, xK_l              ), spawn "playerctl next")
-                    , (( modm, xK_l           ), spawn "playerctl next" >> (submap . M.fromList $ playerKeys conf))
-                    , (( 0, xK_h              ), spawn "playerctl previous")
-                    , (( modm, xK_h           ), spawn "playerctl previous" >> (submap . M.fromList $ playerKeys conf))
-                    , (( 0, xK_space          ), spawn "playerctl play-pause")
-                    , (( modm, xK_space       ), spawn "playerctl play-pause" >> (submap . M.fromList $ playerKeys conf))
-                    , (( 0, xK_k              ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
-                    , (( modm , xK_k          ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%" >> (submap . M.fromList $ playerKeys conf))
-                    , (( 0, xK_j              ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
-                    , (( modm, xK_j           ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%" >> (submap . M.fromList $ playerKeys conf))
-                    , (( 0, xK_m              ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
-                    , (( modm, xK_m           ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle" >> (submap . M.fromList $ playerKeys conf))
-                    ]
+    [ (( 0,                                  xK_l      ), spawn "playerctl next")
+    , (( modm,                               xK_l      ), spawn "playerctl next" >> (submap . M.fromList $ playerKeys conf))
+    , (( 0,                                  xK_h      ), spawn "playerctl previous")
+    , (( modm,                               xK_h      ), spawn "playerctl previous" >> (submap . M.fromList $ playerKeys conf))
+    , (( 0,                                  xK_space  ), spawn "playerctl play-pause")
+    , (( modm,                               xK_space  ), spawn "playerctl play-pause" >> (submap . M.fromList $ playerKeys conf))
+    , (( 0,                                  xK_k      ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+    , (( modm,                               xK_k      ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%" >> (submap . M.fromList $ playerKeys conf))
+    , (( 0,                                  xK_j      ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+    , (( modm,                               xK_j      ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%" >> (submap . M.fromList $ playerKeys conf))
+    , (( 0,                                  xK_m      ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+    , (( modm,                               xK_m      ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle" >> (submap . M.fromList $ playerKeys conf))
+    ]
+
+wmKeys conf@(XConfig {XMonad.modMask = modm}) =
+    -- Increment the number of windows in the master area
+    [ (( 0,                                  xK_comma ), sendMessage (IncMasterN 1))
+    -- Deincrement the number of windows in the master area
+    , (( 0,                                  xK_period), sendMessage (IncMasterN (-1)))
+    -- Swap the focused window and the master window
+    , (( 0,                                  xK_Return), windows W.swapMaster)
+    --  Reset the layouts on the current workspace to default
+    , (( 0,                                  xK_Tab   ), setLayout $ XMonad.layoutHook conf)
+    -- Resize viewed windows to the correct size
+    , (( 0,                                  xK_n     ), refresh)
+    -- Push window back into tiling
+    , (( 0,                                  xK_t     ), withFocused $ windows . W.sink)
+    , (( 0,                                  xK_s     ), spawn "screenkey")
+    , (( shiftMask,                          xK_s     ), spawn "killall screenkey")
+    , (( 0,                                  xK_r     ), io ( toggleResolution resolutionsMap) )
+    , (( 0,                                  xK_n     ), io $ spawnDateTimeNotification)
+    , (( modm,                               xK_r     ), io (toggleResolution resolutionsMap) >> (submap . M.fromList $ wmKeys conf))
+    ]
+
+timewKeys conf@(XConfig {XMonad.modMask = modm}) =
+    [ (( 0,                                  xK_space ), spawn "timew stop")
+    , (( 0,                                  xK_c     ), spawn "timew start cx")
+    , (( 0,                                  xK_w     ), spawn "timew start wc")
+    , (( 0,                                  xK_s     ), spawn "timew stop; timew start")
+    ]
+
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch a terminal
-    [ (( modm ,                              xK_Return), spawn $ XMonad.terminal conf)
+    [ (( modm,                               xK_Return), spawn $ XMonad.terminal conf)
 
     -- launch a terminal for recording
     , (( modm .|. shiftMask .|. controlMask, xK_Return), spawn "alacritty --config-file ~/.config/alacritty/record-term.yml" )
@@ -133,7 +166,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , (( myAltMask .|. shiftMask,            xK_Tab   ), nextWS)
 
     -- toggle workspaces
-    , (( myAltMask ,                         xK_Tab   ), toggleWS)
+    , (( myAltMask,                          xK_Tab   ), toggleWS)
 
     -- close focused window
     , (( modm .|. shiftMask,                 xK_c     ), kill)
@@ -188,23 +221,25 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , (( modm .|. shiftMask,                 xK_slash ), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
 
     -- launch switch key layout
-    , (( modm ,                              xK_space ), spawn ".config/xmonad/switch-kb-layout.sh de us")
+    , (( modm,                               xK_space ), spawn ".xmonad/switch-kb-layout.sh de us")
 
     -- set multimedia keys (identified with `xev`)
     -- source https://lambdablob.com/posts/xmonad-audio-volume-alsa-pulseaudio/
-    , (( 0,                  xF86XK_AudioMute          ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
-    , (( 0,                  xF86XK_AudioLowerVolume   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
-    , (( modm .|. shiftMask, xK_Down                   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
-    , (( 0,                  xF86XK_AudioRaiseVolume   ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
-    , (( modm .|. shiftMask, xK_Up                     ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+    , (( 0,                  xF86XK_AudioMute         ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+    , (( 0,                  xF86XK_AudioLowerVolume  ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+    , (( 0,                  xF86XK_AudioRaiseVolume  ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
     -- source https://unix.stackexchange.com/questions/439486/how-can-i-make-media-keys-work-with-i3
-    , (( 0,                  xF86XK_AudioPlay          ), spawn "playerctl play-pause")
-    , (( 0,                  xF86XK_AudioNext          ), spawn "playerctl next")
-    , (( modm .|. shiftMask, xK_Right                  ), spawn "playerctl next")
-    , (( 0,                  xF86XK_AudioPrev          ), spawn "playerctl previous")
-    , (( modm .|. shiftMask, xK_Left                   ), spawn "playerctl previous")
+    , (( 0,                  xF86XK_AudioPlay         ), spawn "playerctl play-pause")
+    , (( 0,                  xF86XK_AudioNext         ), spawn "playerctl next")
+    , (( 0,                  xF86XK_AudioPrev         ), spawn "playerctl previous")
 
-    , ((modm, xK_v ) , submap . M.fromList $ playerKeys conf)
+    , (( modm,                               xK_v     ), submap . M.fromList $ playerKeys conf)
+      -- xmonad seldomly used.
+    , (( modm,                               xK_x     ), submap . M.fromList $ wmKeys conf)
+
+    , (( modm,                               xK_s     ), submap . M.fromList $ timewKeys conf)
+    -- timewarrior
+    , (( modm,                               xK_n     ), io ( spawnDateTimeNotification))
     -- screenshotting
     , ((0,                         xK_Print), spawn "scrot \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
     -- unGrab required by scrot -s
@@ -212,14 +247,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     , ((controlMask,               xK_Print), spawn "scrot -e 'xclip -selection clipboard -t image/png -i \"$f\"; rm \"$f\"'  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
     , ((controlMask .|. shiftMask, xK_Print), unGrab >> spawn "scrot -s -e 'xclip -selection clipboard -t image/png -i \"$f\"; rm \"$f\"'  \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 ")
 
-    -- timewarrior
-    , ((modm, xK_s ) , submap . M.fromList $
-       [ (( 0, xK_space ) , spawn "timew stop")
-       , (( 0, xK_c )     , spawn "timew start cx")
-       , (( 0, xK_w )     , spawn "timew start wc")
-       , (( 0, xK_s )     , spawn "timew stop; timew start")
-       ])
-       , (( modm , xK_n), io $ spawnDateTimeNotification)
 --    , (( modm, xK_n ) , incrementAndPrint )
 
     -- desk light
@@ -227,24 +254,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
        [ (( 0, xK_l ) , spawn "elrs" )
        ]
       )
-      -- xmonad seldomly used.
-      , ((modm , xK_x ) , submap . M.fromList $
-             -- Increment the number of windows in the master area
-             [ (( 0        , xK_comma ), sendMessage (IncMasterN 1))
-             -- Deincrement the number of windows in the master area
-             , (( 0        , xK_period), sendMessage (IncMasterN (-1)))
-             -- Swap the focused window and the master window
-             , (( 0        , xK_Return), windows W.swapMaster)
-             --  Reset the layouts on the current workspace to default
-             , (( 0        , xK_Tab  ), setLayout $ XMonad.layoutHook conf)
-             -- Resize viewed windows to the correct size
-             , (( 0        , xK_n    ), refresh)
-             -- Push window back into tiling
-             , (( 0        , xK_t    ), withFocused $ windows . W.sink)
-             , (( 0        , xK_s ), spawn "screenkey")
-             , (( shiftMask, xK_s ), spawn "killall screenkey")
-             ]
-            )
 
     ]
     ++
