@@ -388,20 +388,20 @@ myLayout = mkToggle (NOBORDERS ?? FULL ?? EOT) $ marginSpacing 4 $ avoidStruts $
 -- 'className' and 'resource' are used below.
 --
 myManageHook = composeAll
-    [ className =? "MPlayer"        --> doFloat
-    , className =? "Gimp"           --> doFloat
-    , resource  =? "desktop_window" --> doIgnore
-    , resource  =? "kdesktop"       --> doIgnore
-    , className =? "firefox"     --> doShift ( myWorkspaces !! 2 )
-    , className =? "strawberry"     --> doShift ( myWorkspaces !! 4 )
-    , className =? "discord"     --> doShift ( myWorkspaces !! 3 )
-    --, className =? "jetbrains-goland"     --> doShift ( myWorkspaces !! 0 )
---    , className =? "Steam"     --> doShift ( myWorkspaces !! 3 )
-    , className =? "battle.net.exe" --> doFullFloat
-    , className =? "Conky"          --> doFloat
---    , className =? "steam_app_*"    --> doFloat
-
-    , isFullscreen                  --> doFullFloat
+    [ className =? "MPlayer"            --> doFloat
+    , className =? "Gimp"               --> doFloat
+    , resource  =? "desktop_window"     --> doIgnore
+    , resource  =? "kdesktop"           --> doIgnore
+    , className =? "firefox"            --> doShift ( myWorkspaces !! 2 )
+    , className =? "strawberry"         --> doShift ( myWorkspaces !! 4 )
+    , className =? "discord"            --> doShift ( myWorkspaces !! 3 )
+    , className =? "battle.net.exe"     --> doFullFloat
+    , className =? "Conky"              --> doFloat
+    , title =?     "Citrix Workspace"   --> doShift ( myWorkspaces !! 6 )
+    , className =? "Wfica" --> doShift ( myWorkspaces !! 6 )
+    , className =? "VirtualBox Manager" --> doShift ( myWorkspaces !! 6 )
+    , className =? "VirtualBox Machine" --> doShift ( myWorkspaces !! 6 )
+    , isFullscreen                      --> doFullFloat
     ] <+> namedScratchpadManageHook myScratchPads
 
 ------------------------------------------------------------------------
