@@ -43,6 +43,7 @@ return {
         "css",
         "rust",
         "yaml",
+        "kdl",
         "zig",
         "haskell",
         "go",
