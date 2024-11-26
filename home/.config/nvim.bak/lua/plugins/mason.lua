@@ -22,6 +22,9 @@ return {
 --         end
 --     },
     {
+        "williamboman/mason.nvim",
+    },
+    {
         "mrcjkb/rustaceanvim",
         version = "^4",
         ft = { "rust" },
@@ -61,9 +64,6 @@ return {
                 {},
                 opts or {})
         end
-    },
-    {
-        "williamboman/mason.nvim",
     },
      {
        "jay-babu/mason-nvim-dap.nvim",
