@@ -316,7 +316,7 @@ myScratchPads = [ NS "terminal" spawnTerm findTerm manageTerm
                 , NS "web" spawnFirefox findFirefox manageFirefox
                 ]
   where
-    spawnTerm  = myTerminal ++ " -t scratchpadTerm -e tmux new -s scratch"
+    spawnTerm  = myTerminal ++ " -t scratchpadTerm -e tmux attach-session -t  scratch || tmux new -s scratch"
     findTerm   = title =? "scratchpadTerm"
     manageTerm =  customFloating $ W.RationalRect l t w h
                where
