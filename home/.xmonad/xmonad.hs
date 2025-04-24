@@ -413,18 +413,14 @@ myManageHook = composeAll
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
-myEventHook = ewmhDesktopsEventHook
+myEventHook = mempty
 
 ------------------------------------------------------------------------
 -- Status bars and logging
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
--- for older version
--- myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP $ namedScratchpadFilterOutWorkspacePP $ xmobarPP
--- for newer versions
--- myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP ( filterOutWsPP [scratchpadWorkspaceTag] xmobarPP )
-myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP ( namedScratchpadFilterOutWorkspacePP xmobarPP )
+myLogHook = \xmproc -> workspaceHistoryHook >> dynamicLogWithPP (filterOutWsPP [scratchpadWorkspaceTag] xmobarPP)
   { ppOutput =  hPutStrLn xmproc -- pipe output to xmobar process
   , ppTitle  = xmobarColor cXmbTitle "" . shorten 50
   --, ppCurrent = xmobarColor cXmbCurrent "" . wrap ("<box type=Bottom width=2 mb=2 color="++ cXmbCurrent ++ ">") "</box>"
@@ -498,7 +494,7 @@ defaults xmobarproc = ewmh $ def {
       -- hooks, layouts
         layoutHook         = smartBorders myLayout,
         manageHook         = myManageHook,
-        handleEventHook    = myEventHook,
+        handleEventHook    = handleEventHook def <> myEventHook,
         logHook            = myLogHook xmobarproc,
         startupHook        = myStartupHook
     }
