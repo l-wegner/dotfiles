@@ -1,5 +1,5 @@
 [font]
-size = 8.0
+size = 10.0
 
 [[keyboard.bindings]]
 action = "Paste"
@@ -11,4 +11,4 @@ mods = "Control"
 save_to_clipboard = true
 
 [window]
-opacity = 0.93
+opacity = 0.94
