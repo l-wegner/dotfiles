@@ -11,12 +11,13 @@ import Data.Map qualified as M
 import Data.Maybe (Maybe (Just), fromJust, isJust)
 import Data.Monoid
 import Data.Ratio
+import Display (switchResolution, toggleResolution)
+import GHC.IO.Handle.Types (Handle)
 import Graphics.X11.ExtraTypes.XF86
-import MyUtils (findExecutableInList, isCommandAvailable, showNotification, spawnDateTimeNotification, toggleResolution)
+import MyUtils (dmenuPopup, findExecutableInList, isCommandAvailable, showNotification, spawnDateTimeNotification)
 import System.Exit
 import XMonad
 import XMonad.Actions.CycleWS
-import XMonad.Actions.CycleWindows
 import XMonad.Actions.Submap (submap)
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
@@ -33,39 +34,52 @@ import XMonad.Layout.NoBorders
 import XMonad.Layout.PerScreen
 import XMonad.Layout.Spacing
 import XMonad.Layout.ThreeColumns
+-- import XMonad.Util.Ungrab (unGrab)
+import XMonad.Operations (unGrab)
 import XMonad.StackSet qualified as W
 import XMonad.Util.Cursor
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
-import XMonad.Util.Ungrab (unGrab)
 
 -- Colors
+cUrgent :: String
 cUrgent = "#ff5555"
 
+cBorderFocus :: String
 cBorderFocus = "#005900"
 
+cBorder :: String
 cBorder = "#777777"
 
+cXmbCurrent :: String
 cXmbCurrent = "#00D000"
 
+cXmbVisible :: String
 cXmbVisible = "#0d9300"
 
+cXmbWinCount :: String
 cXmbWinCount = "#0d9300"
 
+cXmbLayoutName :: String
 cXmbLayoutName = "#005900"
 
+cXmbTitle :: String
 cXmbTitle = "#005900"
 
+cXmbSep :: String
 cXmbSep = "#005900"
 
+cXmbHidden :: String
 cXmbHidden = "#005900"
 
+cXmbHiddenEmpty :: String
 cXmbHiddenEmpty = "#005900"
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
+myTerminal :: String
 myTerminal = "alacritty"
 
 -- Whether focus follows the mouse pointer.
@@ -78,6 +92,7 @@ myClickJustFocuses = False
 
 -- Width of the window border in pixels.
 --
+myBorderWidth :: Dimension
 myBorderWidth = 2
 
 -- modMask lets you specify which modkey you want to use. The default
@@ -85,8 +100,10 @@ myBorderWidth = 2
 -- ("right alt"), which does not conflict with emacs keybindings. The
 -- "windows key" is usually mod4Mask.
 --
+myModMask :: KeyMask
 myModMask = mod4Mask
 
+myAltMask :: KeyMask
 myAltMask = mod1Mask
 
 -- The default number of workspaces (virtual screens) and their names.
@@ -98,31 +115,40 @@ myAltMask = mod1Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces = ["main", "alt", "web", "comm", "media"] ++ map show [6 .. 9]
+myWorkspaces :: [String]
+myWorkspaces = ["main", "alt", "web", "comm", "media"] ++ map show ([6 .. 9] :: [Integer])
 
 myWorkspaceIndices :: M.Map String String
-myWorkspaceIndices = M.fromList $ zipWith (,) myWorkspaces $ map show [1 ..]
+myWorkspaceIndices = M.fromList $ zipWith (,) myWorkspaces $ map show ([1 ..] :: [Integer])
 
+clickable :: String -> [Char]
 clickable ws = "<action=xdotool key super+" ++ i ++ ">" ++ ws ++ "</action>"
   where
     i = fromJust $ M.lookup ws myWorkspaceIndices
 
 -- Border colors for unfocused and focused windows, respectively.
 --
+myNormalBorderColor :: String
 myNormalBorderColor = cBorder
 
+myFocusedBorderColor :: String
 myFocusedBorderColor = cBorderFocus
 
 resolutionsMap :: M.Map String [String]
 resolutionsMap =
   M.fromList
     [ ("eDP-1", ["1920x1080"]),
-      ("DP-3", ["3440 x 1440", "1920x1080"])
+      ("DP-0", ["1920x1080", "3440x1440"]),
+      ("DP-1", ["1920x1080", "3440x1440"]),
+      ("DP-2", ["1920x1080", "3440x1440"]),
+      ("DP-3", ["1920x1080", "3440x1440"])
     ]
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
+-- playerKeys :: XConfig l -> [((KeyMask, KeySym), X ())]
+playerKeys :: XConfig Layout -> [((KeyMask, KeySym), X ())]
 playerKeys conf@(XConfig {XMonad.modMask = modm}) =
   [ ((0, xK_l), spawn "playerctl next"),
     ((modm, xK_l), spawn "playerctl next" >> (submap . M.fromList $ playerKeys conf)),
@@ -138,6 +164,7 @@ playerKeys conf@(XConfig {XMonad.modMask = modm}) =
     ((modm, xK_m), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle" >> (submap . M.fromList $ playerKeys conf))
   ]
 
+wmKeys :: XConfig Layout -> [((KeyMask, KeySym), X ())]
 wmKeys conf@(XConfig {XMonad.modMask = modm}) =
   -- Increment the number of windows in the master area
   [ ((0, xK_comma), sendMessage (IncMasterN 1)),
@@ -153,8 +180,9 @@ wmKeys conf@(XConfig {XMonad.modMask = modm}) =
     ((0, xK_t), withFocused $ windows . W.sink),
     ((0, xK_s), spawn "screenkey"),
     ((shiftMask, xK_s), spawn "killall screenkey"),
-    ((0, xK_r), io (toggleResolution resolutionsMap)),
-    ((0, xK_n), io $ spawnDateTimeNotification),
+    ((0, xK_r), io switchResolution),
+    ((0, xK_e), io $ toggleResolution resolutionsMap),
+    ((0, xK_n), io spawnDateTimeNotification),
     ((modm, xK_r), io (toggleResolution resolutionsMap) >> (submap . M.fromList $ wmKeys conf))
   ]
 
@@ -279,6 +307,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
 ------------------------------------------------------------------------
 -- Mouse bindings: default actions bound to mouse events
 --
+myMouseBindings :: XConfig l -> M.Map (KeyMask, Button) (Window -> X ())
 myMouseBindings (XConfig {XMonad.modMask = modm}) =
   M.fromList $
     -- mod-button1, Set the window to floating mode and move by dragging
@@ -301,9 +330,6 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) =
       )
       -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
-
-myPopup :: String -> X ()
-myPopup msg = spawn $ "echo '" ++ msg ++ "' | dzen2 -p 2 -h 30 -w 200 -x 500 -y 500 -fn 'xft:Monospace-12' -bg '#rrggbb' -fg '#rrggbb'"
 
 ------------------------------------------------------------------------
 -- Scratchpads :
@@ -386,6 +412,7 @@ myLayout = mkToggle (NOBORDERS ?? FULL ?? EOT) $ marginSpacing 4 $ avoidStruts $
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 --
+myManageHook :: Query (Endo WindowSet)
 myManageHook =
   composeAll
     [ className =? "MPlayer" --> doFloat,
@@ -415,6 +442,7 @@ myManageHook =
 -- return (All True) if the default handler is to be run afterwards. To
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
+myEventHook :: Event -> X All
 myEventHook = mempty
 
 ------------------------------------------------------------------------
@@ -422,6 +450,7 @@ myEventHook = mempty
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
+myLogHook :: Handle -> X ()
 myLogHook = \xmproc ->
   workspaceHistoryHook
     >> dynamicLogWithPP
@@ -451,6 +480,7 @@ windowCount = gets $ Just . xmobarColor cXmbWinCount "" . show . length . W.inte
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
+myStartupHook :: X ()
 myStartupHook = do
   setDefaultCursor xC_left_ptr
   setWMName "LG3D"
@@ -471,6 +501,7 @@ myStartupHook = do
 
 -- Run xmonad with the settings you specify. No need to modify this.
 --
+main :: IO ()
 main = do
   xmproc <- spawnPipe "xmobar -x 0 ~/.config/xmobar/xmobarrc"
   xmonad $ docks (defaults xmproc)
@@ -481,6 +512,7 @@ main = do
 --
 -- No need to modify this.
 --
+defaults :: Handle -> XConfig (ModifiedLayout SmartBorder (MultiToggle (HCons StdTransformers (HCons StdTransformers EOT)) (ModifiedLayout Spacing (ModifiedLayout AvoidStruts (PerScreen (Choose ThreeCol (Choose ThreeCol Tall)) Tall)))))
 defaults xmobarproc =
   ewmh $
     def

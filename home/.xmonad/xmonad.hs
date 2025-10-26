@@ -153,7 +153,8 @@ wmKeys conf@(XConfig {XMonad.modMask = modm}) =
     ((0, xK_t), withFocused $ windows . W.sink),
     ((0, xK_s), spawn "screenkey"),
     ((shiftMask, xK_s), spawn "killall screenkey"),
-    ((0, xK_r), io (toggleResolution resolutionsMap)),
+    ((0, xK_r), spawn "~/dotfiles/scripts/rofi/select-resolution.sh"),
+    --((0, xK_r), io (toggleResolution resolutionsMap)),
     ((0, xK_n), io $ spawnDateTimeNotification),
     ((modm, xK_r), io (toggleResolution resolutionsMap) >> (submap . M.fromList $ wmKeys conf))
   ]
