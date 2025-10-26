@@ -259,7 +259,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       ((modm, xK_x), submap . M.fromList $ wmKeys conf),
       ((modm, xK_s), submap . M.fromList $ timewKeys conf),
       -- timewarrior
-      ((modm, xK_n), io (spawnDateTimeNotification)),
+      ((modm, xK_n), io spawnDateTimeNotification),
       -- screenshotting
       ((0, xK_Print), spawn "scrot \"$HOME/Pictures/Screenshot from %Y-%m-%d %H-%M-%S.png\" > $HOME/errors.log 2>&1 "),
       -- unGrab required by scrot -s

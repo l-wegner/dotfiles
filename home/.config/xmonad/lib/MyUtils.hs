@@ -13,7 +13,6 @@ module MyUtils
   )
 where
 
-import Control.Monad.State
 import Data.IORef
 import Data.List (isPrefixOf)
 import Data.Maybe (fromMaybe)
@@ -22,7 +21,7 @@ import Data.Maybe (fromMaybe)
 import Network.HostName (getHostName)
 -- ubuntu requires: sudo apt install libghc-network-info-dev
 -- arch requires: sudo pacman -S haskell-network-info
-import Network.Info (NetworkInterface (..), getNetworkInterfaces, ipv4)
+import Network.Info (NetworkInterface (..), getNetworkInterfaces)
 import System.Directory
 import XMonad
 import XMonad.Util.Run (runProcessWithInput, safeSpawn)
@@ -77,7 +76,7 @@ getWifiSSIDString :: IO String
 getWifiSSIDString = fromMaybe "" <$> getWifiSSID
 
 findExecutableInList :: [String] -> IO (Maybe String)
-findExecutableInList executables = go executables
+findExecutableInList = go
   where
     go [] = return Nothing
     go (exe : rest) = do
