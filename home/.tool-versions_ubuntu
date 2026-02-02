@@ -1,5 +1,5 @@
 maven 3.9.0
-java openjdk-11.0.2
-nodejs 21.6.2
+java temurin-17.0.17+10
+nodejs 25.1.0
 python 3.12.2
 
