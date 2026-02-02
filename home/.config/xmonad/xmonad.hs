@@ -34,13 +34,13 @@ import XMonad.Layout.NoBorders
 import XMonad.Layout.PerScreen
 import XMonad.Layout.Spacing
 import XMonad.Layout.ThreeColumns
--- import XMonad.Util.Ungrab (unGrab)
-import XMonad.Operations (unGrab)
+-- import XMonad.Operations (unGrab)
 import XMonad.StackSet qualified as W
 import XMonad.Util.Cursor
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.SpawnOnce
+import XMonad.Util.Ungrab (unGrab)
 
 -- Colors
 cUrgent :: String
@@ -139,9 +139,9 @@ resolutionsMap =
   M.fromList
     [ ("eDP-1", ["1920x1080"]),
       ("DP-0", ["1920x1080", "3440x1440"]),
-      ("DP-1", ["1920x1080", "3440x1440"]),
-      ("DP-2", ["1920x1080", "3440x1440"]),
-      ("DP-3", ["1920x1080", "3440x1440"])
+      ("DP-1", ["2560x1080", "1920x1080", "3440x1440"]),
+      ("DP-2", ["2560x1080", "1920x1080", "3440x1440"]),
+      ("DP-3", ["2560x1080", "1920x1080", "3440x1440"])
     ]
 
 ------------------------------------------------------------------------
