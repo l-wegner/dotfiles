@@ -340,7 +340,7 @@ myScratchPads =
     NS "web" spawnFirefox findFirefox manageFirefox
   ]
   where
-    spawnTerm = myTerminal ++ " -t scratchpadTerm -e zsh -c 'tmux attach-session -t  scratch || tmux new -s scratch'"
+    spawnTerm = myTerminal ++ " -t scratchpadTerm -e zsh -i -c 'source ~/.local/bin/start-tmux.sh && start_custom_tmux &> ~/.local/bin/start.log'"
     findTerm = title =? "scratchpadTerm"
     manageTerm = customFloating $ W.RationalRect l t w h
       where

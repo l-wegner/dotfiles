@@ -154,7 +154,7 @@ wmKeys conf@(XConfig {XMonad.modMask = modm}) =
     ((0, xK_s), spawn "screenkey"),
     ((shiftMask, xK_s), spawn "killall screenkey"),
     ((0, xK_r), spawn "~/dotfiles/scripts/rofi/select-resolution.sh"),
-    --((0, xK_r), io (toggleResolution resolutionsMap)),
+    -- ((0, xK_r), io (toggleResolution resolutionsMap)),
     ((0, xK_n), io $ spawnDateTimeNotification),
     ((modm, xK_r), io (toggleResolution resolutionsMap) >> (submap . M.fromList $ wmKeys conf))
   ]
@@ -315,7 +315,7 @@ myScratchPads =
     NS "web" spawnFirefox findFirefox manageFirefox
   ]
   where
-    spawnTerm = myTerminal ++ " -t scratchpadTerm -e tmux attach-session -t  scratch || tmux new -s scratch"
+    spawnTerm = myTerminal ++ " -t scratchpadTerm -e source ~/.local/bin/start-tmux.sh; start_custom_tmux"
     findTerm = title =? "scratchpadTerm"
     manageTerm = customFloating $ W.RationalRect l t w h
       where
