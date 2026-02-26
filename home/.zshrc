@@ -116,6 +116,7 @@ source $ZSH/oh-my-zsh.sh
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias olddunst="dunstctl history | jq '[.data[][0:15][].message.data]'"
 alias docker=podman
+alias lg=lazygit
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
